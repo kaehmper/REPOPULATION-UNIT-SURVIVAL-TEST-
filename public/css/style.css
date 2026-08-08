@@ -1,0 +1,36 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #222;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+#ui-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border: 2px solid #555;
+    pointer-events: none; /* Let clicks pass through to the game, except buttons */
+}
+
+#crafting {
+    margin-top: 10px;
+    pointer-events: auto;
+}
+
+button {
+    background: #444;
+    color: white;
+    border: 1px solid #777;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #666;
+}

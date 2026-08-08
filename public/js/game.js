@@ -1,0 +1,183 @@
+let socket = null;
+
+let mapData = null;
+let myId = null;
+
+const config = {
+    type: Phaser.AUTO,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    parent: 'game-container',
+    pixelArt: true,
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+const game = new Phaser.Game(config);
+
+let cursors;
+let playerSprites = {};
+let entitySprites = {};
+let resourceSprites = {};
+
+// To handle camera follow
+let cameraTarget = null;
+let gameScene = null;
+
+function preload() {
+    // Entities
+    this.load.image('player', 'assets/player.png');
+    this.load.image('scientist', 'assets/scientist.png');
+    this.load.image('wolf', 'assets/wolf.png');
+    this.load.image('pig', 'assets/pig.png');
+    this.load.image('chicken', 'assets/chicken.png');
+
+    // Resources
+    this.load.image('tree', 'assets/tree.png');
+    this.load.image('rock', 'assets/rock.png');
+
+    // Tiles
+    this.load.image('grass', 'assets/grass.png');
+    this.load.image('water', 'assets/water.png');
+}
+
+function create() {
+    gameScene = this;
+    cursors = this.input.keyboard.createCursorKeys();
+
+    this.keys = {
+        W: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+        A: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+        S: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+        D: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+    };
+
+    socket = io();
+
+    // Handle clicks for interaction
+    this.input.on('pointerdown', function (pointer) {
+        socket.emit('interact', { x: pointer.worldX, y: pointer.worldY });
+    });
+
+    socket.on('init', (data) => {
+        myId = data.id;
+        mapData = data;
+
+        // Render Map
+        for (let y = 0; y < data.mapHeight; y++) {
+            for (let x = 0; x < data.mapWidth; x++) {
+                let tileType = data.map[y][x];
+                let key = tileType === 1 ? 'water' : 'grass';
+                this.add.image(x * data.tileSize + data.tileSize/2, y * data.tileSize + data.tileSize/2, key);
+            }
+        }
+
+        // Set world bounds
+        this.cameras.main.setBounds(0, 0, data.mapWidth * data.tileSize, data.mapHeight * data.tileSize);
+    });
+
+    socket.on('state', (state) => {
+        if (!mapData) return; // Wait for init
+
+        // --- UPDATE PLAYERS ---
+        const serverPlayerIds = Object.keys(state.players);
+
+        // Remove disconnected players
+        for (let id in playerSprites) {
+            if (!serverPlayerIds.includes(id)) {
+                playerSprites[id].destroy();
+                delete playerSprites[id];
+            }
+        }
+
+        // Update or add players
+        for (let id of serverPlayerIds) {
+            let pData = state.players[id];
+
+            if (!playerSprites[id]) {
+                playerSprites[id] = gameScene.add.sprite(pData.x, pData.y, 'player');
+
+                if (id === myId) {
+                    cameraTarget = playerSprites[id];
+                    gameScene.cameras.main.startFollow(cameraTarget);
+                }
+            } else {
+                // Interpolation could go here, for now just set position
+                playerSprites[id].setPosition(pData.x, pData.y);
+            }
+
+            // Hide dead players
+            playerSprites[id].setVisible(pData.health > 0);
+
+            // Update UI for local player
+            if (id === myId) {
+                document.getElementById('health').innerText = pData.health;
+                document.getElementById('hunger').innerText = pData.hunger;
+                document.getElementById('inv-wood').innerText = pData.inventory.wood;
+                document.getElementById('inv-stone').innerText = pData.inventory.stone;
+                document.getElementById('inv-spear').innerText = pData.inventory.spear;
+                document.getElementById('inv-campfire').innerText = pData.inventory.campfire;
+            }
+        }
+
+        // --- UPDATE ENTITIES ---
+        const serverEntityIds = Object.keys(state.entities);
+        for (let id in entitySprites) {
+            if (!serverEntityIds.includes(id)) {
+                entitySprites[id].destroy();
+                delete entitySprites[id];
+            }
+        }
+        for (let id of serverEntityIds) {
+            let eData = state.entities[id];
+            if (!entitySprites[id]) {
+                entitySprites[id] = gameScene.add.sprite(eData.x, eData.y, eData.type);
+            } else {
+                entitySprites[id].setPosition(eData.x, eData.y);
+            }
+        }
+
+        // --- UPDATE RESOURCES ---
+        const serverResourceIds = Object.keys(state.resources);
+        for (let id in resourceSprites) {
+            if (!serverResourceIds.includes(id)) {
+                resourceSprites[id].destroy();
+                delete resourceSprites[id];
+            }
+        }
+        for (let id of serverResourceIds) {
+            let rData = state.resources[id];
+            if (!resourceSprites[id]) {
+                resourceSprites[id] = gameScene.add.sprite(rData.x, rData.y, rData.type);
+            }
+        }
+    });
+}
+
+function update() {
+    if (!myId) return;
+
+    // Send input to server
+    let input = {
+        up: cursors.up.isDown || this.keys.W.isDown,
+        down: cursors.down.isDown || this.keys.S.isDown,
+        left: cursors.left.isDown || this.keys.A.isDown,
+        right: cursors.right.isDown || this.keys.D.isDown
+    };
+
+    if (input.up || input.down || input.left || input.right) {
+        socket.emit('move', input);
+    }
+}
+
+// Global craft function for HTML buttons
+window.craft = function(item) {
+    socket.emit('craft', item);
+};
+
+window.addEventListener('resize', () => {
+    game.scale.resize(window.innerWidth, window.innerHeight);
+});

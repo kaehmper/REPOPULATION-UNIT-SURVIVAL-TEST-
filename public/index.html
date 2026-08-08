@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust 2D Remake</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="ui-container">
+        <div id="stats">
+            Health: <span id="health">100</span> |
+            Hunger: <span id="hunger">100</span>
+        </div>
+        <div id="inventory">
+            Wood: <span id="inv-wood">0</span> |
+            Stone: <span id="inv-stone">0</span> |
+            Spears: <span id="inv-spear">0</span> |
+            Campfires: <span id="inv-campfire">0</span>
+        </div>
+        <div id="crafting">
+            <button onclick="craft('spear')">Craft Spear (10W, 5S)</button>
+            <button onclick="craft('campfire')">Craft Campfire (20W)</button>
+        </div>
+    </div>
+
+    <div id="game-container"></div>
+    <script src="js/game.js"></script>
+</body>
+</html>
