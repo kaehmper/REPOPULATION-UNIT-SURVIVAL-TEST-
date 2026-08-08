@@ -26,18 +26,21 @@ def start_server(port):
     env = os.environ.copy()
     env["PORT"] = str(port)
 
-    # On Windows, use shell=True to let the OS resolve 'node' from the PATH
-    use_shell = platform.system() == "Windows"
+    # On Windows, use shell=True and pass the command as a string or list
+    # Use 'npm start' since it correctly abstracts node execution cross-platform
+    is_windows = platform.system() == "Windows"
+
+    command = "npm start" if is_windows else ["npm", "start"]
 
     try:
         server_process = subprocess.Popen(
-            ["node", "server/index.js"],
+            command,
             env=env,
-            shell=use_shell
+            shell=is_windows
         )
         return server_process
     except FileNotFoundError:
-        print("Error: 'node' executable not found. Please ensure Node.js is installed and in your system PATH.", file=sys.stderr)
+        print("Error: 'npm' executable not found. Please ensure Node.js/npm is installed and in your system PATH.", file=sys.stderr)
         sys.exit(1)
 
 def open_game(port):
