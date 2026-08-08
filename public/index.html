@@ -9,24 +9,70 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <div id="game-container"></div>
+
     <div id="ui-container">
-        <div id="stats">
-            Health: <span id="health">100</span> |
-            Hunger: <span id="hunger">100</span>
+        <!-- Main Inventory and Crafting Screen -->
+        <div id="inventory-screen" style="display: none;">
+            <div class="inventory-section">
+                <h3>Inventory</h3>
+                <div class="grid" id="main-inventory">
+                    <div class="slot"><span class="item-count" id="inv-wood-count">0</span><div class="item-name">Wood</div></div>
+                    <div class="slot"><span class="item-count" id="inv-stone-count">0</span><div class="item-name">Stone</div></div>
+                    <div class="slot"><span class="item-count" id="inv-spear-count">0</span><div class="item-name">Spear</div></div>
+                    <div class="slot"><span class="item-count" id="inv-campfire-count">0</span><div class="item-name">Campfire</div></div>
+                    <div class="slot"></div>
+                    <div class="slot"></div>
+                    <div class="slot"></div>
+                    <div class="slot"></div>
+                    <div class="slot"></div>
+                    <div class="slot"></div>
+                    <div class="slot"></div>
+                    <div class="slot"></div>
+                </div>
+            </div>
+
+            <div class="crafting-section">
+                <h3>Crafting</h3>
+                <div class="crafting-list">
+                    <div class="craft-item" onclick="craft('spear')">
+                        <div class="craft-info">Spear (10W, 5S)</div>
+                        <button class="craft-btn">Craft</button>
+                    </div>
+                    <div class="craft-item" onclick="craft('campfire')">
+                        <div class="craft-info">Campfire (20W)</div>
+                        <button class="craft-btn">Craft</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="inventory">
-            Wood: <span id="inv-wood">0</span> |
-            Stone: <span id="inv-stone">0</span> |
-            Spears: <span id="inv-spear">0</span> |
-            Campfires: <span id="inv-campfire">0</span>
-        </div>
-        <div id="crafting">
-            <button onclick="craft('spear')">Craft Spear (10W, 5S)</button>
-            <button onclick="craft('campfire')">Craft Campfire (20W)</button>
+
+        <!-- HUD (Always visible) -->
+        <div id="hud">
+            <div id="hotbar">
+                <div class="hotbar-slot"><span class="slot-num">1</span></div>
+                <div class="hotbar-slot"><span class="slot-num">2</span></div>
+                <div class="hotbar-slot"><span class="slot-num">3</span></div>
+                <div class="hotbar-slot"><span class="slot-num">4</span></div>
+                <div class="hotbar-slot"><span class="slot-num">5</span></div>
+                <div class="hotbar-slot"><span class="slot-num">6</span></div>
+            </div>
+
+            <div id="stats">
+                <div class="stat-bar-container">
+                    <div class="stat-bar health-bar" id="health-bar" style="width: 100%;"></div>
+                    <span class="stat-label">HP <span id="health-val">100</span></span>
+                </div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar hunger-bar" id="hunger-bar" style="width: 100%;"></div>
+                    <span class="stat-label">Food <span id="hunger-val">100</span></span>
+                </div>
+            </div>
+
+            <div id="ui-hint">Press <strong>TAB</strong> to toggle inventory</div>
         </div>
     </div>
 
-    <div id="game-container"></div>
     <script src="js/game.js"></script>
 </body>
 </html>

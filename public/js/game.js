@@ -114,12 +114,18 @@ function create() {
 
             // Update UI for local player
             if (id === myId) {
-                document.getElementById('health').innerText = pData.health;
-                document.getElementById('hunger').innerText = pData.hunger;
-                document.getElementById('inv-wood').innerText = pData.inventory.wood;
-                document.getElementById('inv-stone').innerText = pData.inventory.stone;
-                document.getElementById('inv-spear').innerText = pData.inventory.spear;
-                document.getElementById('inv-campfire').innerText = pData.inventory.campfire;
+                // Update stats
+                document.getElementById('health-val').innerText = pData.health;
+                document.getElementById('health-bar').style.width = pData.health + '%';
+
+                document.getElementById('hunger-val').innerText = pData.hunger;
+                document.getElementById('hunger-bar').style.width = pData.hunger + '%';
+
+                // Update inventory
+                document.getElementById('inv-wood-count').innerText = pData.inventory.wood;
+                document.getElementById('inv-stone-count').innerText = pData.inventory.stone;
+                document.getElementById('inv-spear-count').innerText = pData.inventory.spear;
+                document.getElementById('inv-campfire-count').innerText = pData.inventory.campfire;
             }
         }
 
@@ -180,4 +186,17 @@ window.craft = function(item) {
 
 window.addEventListener('resize', () => {
     game.scale.resize(window.innerWidth, window.innerHeight);
+});
+
+// UI Toggle Logic
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+        e.preventDefault(); // Prevent default tab navigation
+        const invScreen = document.getElementById('inventory-screen');
+        if (invScreen.style.display === 'none') {
+            invScreen.style.display = 'flex';
+        } else {
+            invScreen.style.display = 'none';
+        }
+    }
 });

@@ -21,6 +21,7 @@
   "homepage": "https://github.com/kaehmper/REPOPULATION-UNIT-SURVIVAL-TEST-#readme",
   "dependencies": {
     "express": "^5.2.1",
+    "playwright": "^1.62.1",
     "socket.io": "^4.8.3"
   }
 }
