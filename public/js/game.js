@@ -29,7 +29,7 @@ let gameScene = null;
 
 function preload() {
     // Entities
-    this.load.image('player', 'assets/player.png');
+    this.load.spritesheet('player', 'assets/player.png', { frameWidth: 64, frameHeight: 64 });
     this.load.image('scientist', 'assets/scientist.png');
     this.load.image('wolf', 'assets/wolf.png');
     this.load.image('pig', 'assets/pig.png');
@@ -56,6 +56,20 @@ function create() {
     };
 
     socket = io();
+
+    // Animations
+    this.anims.create({
+        key: 'player-idle',
+        frames: this.anims.generateFrameNumbers('player', { start: 0, end: 0 }),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: 'player-walk',
+        frames: this.anims.generateFrameNumbers('player', { start: 1, end: 4 }),
+        frameRate: 8,
+        repeat: -1
+    });
 
     // Handle clicks for interaction
     this.input.on('pointerdown', function (pointer) {
@@ -99,14 +113,35 @@ function create() {
 
             if (!playerSprites[id]) {
                 playerSprites[id] = gameScene.add.sprite(pData.x, pData.y, 'player');
+                playerSprites[id].play('player-idle');
 
                 if (id === myId) {
                     cameraTarget = playerSprites[id];
                     gameScene.cameras.main.startFollow(cameraTarget);
                 }
             } else {
+                // Determine movement for animation
+                let dx = pData.x - playerSprites[id].x;
+                let dy = pData.y - playerSprites[id].y;
+                let isMoving = Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5;
+
                 // Interpolation could go here, for now just set position
                 playerSprites[id].setPosition(pData.x, pData.y);
+
+                if (isMoving) {
+                    if (playerSprites[id].anims.currentAnim?.key !== 'player-walk') {
+                        playerSprites[id].play('player-walk');
+                    }
+                    if (dx > 0) {
+                        playerSprites[id].setFlipX(false);
+                    } else if (dx < 0) {
+                        playerSprites[id].setFlipX(true);
+                    }
+                } else {
+                    if (playerSprites[id].anims.currentAnim?.key !== 'player-idle') {
+                        playerSprites[id].play('player-idle');
+                    }
+                }
             }
 
             // Hide dead players
