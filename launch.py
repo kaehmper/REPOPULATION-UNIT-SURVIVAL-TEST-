@@ -21,19 +21,24 @@ def start_server(port):
     print(f"Starting server on port {port}...")
     # Set the PORT environment variable so the node script uses it
     import os
-    import shutil
+    import platform
 
     env = os.environ.copy()
     env["PORT"] = str(port)
 
-    # Resolve the node executable path to avoid WinError 2 on Windows
-    node_executable = shutil.which("node")
-    if node_executable is None:
+    # On Windows, use shell=True to let the OS resolve 'node' from the PATH
+    use_shell = platform.system() == "Windows"
+
+    try:
+        server_process = subprocess.Popen(
+            ["node", "server/index.js"],
+            env=env,
+            shell=use_shell
+        )
+        return server_process
+    except FileNotFoundError:
         print("Error: 'node' executable not found. Please ensure Node.js is installed and in your system PATH.", file=sys.stderr)
         sys.exit(1)
-
-    server_process = subprocess.Popen([node_executable, "server/index.js"], env=env)
-    return server_process
 
 def open_game(port):
     url = f"http://localhost:{port}"
